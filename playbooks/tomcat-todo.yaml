@@ -1,50 +1,52 @@
-#playbook para centos
-
-#instalar jdk de java
-#instalar tomcat
-#Despliega la aplicación todo.war en Tomcat.
-#Configura el archivo app.properties con los datos de acceso a la base de datos
-#configurar tomcat para que se inicie como servicio mediante systemd
-#habilitar los puertos de tomcat en el firewall
-#instalar y configurar la aplicación todo
-
 ---
 - name: Configurar servidor CentOS con Tomcat
   hosts: centos
   become: yes
 
-   vars:
-    tomcat_version: "8.5.85"
+  vars:
+    tomcat_version: "8.5.73"
     tomcat_tar: "apache-tomcat-{{ tomcat_version }}.tar.gz"
-   tomcat_url:"http://mirror.reverse.net/pub/apache/tomcat/tomcat-8/v{{ tomcat_version }}/bin/{{ tomcat_tar }}"
+    tomcat_url: "https://ftp.unicamp.br/pub/apache/tomcat/tomcat-8/v8.5.73/bin/apache-tomcat-8.5.73.tar.gz"
     app_properties_file: "/opt/tomcat/conf/app.properties"
     war_file: "/opt/tomcat/webapps/todo.war"
 
   tasks:
     - name: Instalar JDK de Java
-      yum:
+      ansible.builtin.yum:
         name: java-1.8.0-openjdk
         state: present
 
     - name: Descargar Tomcat
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ tomcat_url }}"
         dest: "/tmp/{{ tomcat_tar }}"
 
     - name: Extraer Tomcat
-      unarchive:
+      ansible.builtin.unarchive:
         src: "/tmp/{{ tomcat_tar }}"
         dest: /opt
         remote_src: yes
 
     - name: Crear enlace simbólico para Tomcat
-      file:
+      ansible.builtin.file:
         src: "/opt/apache-tomcat-{{ tomcat_version }}"
         dest: /opt/tomcat
         state: link
 
+    - name: Crear grupo para Tomcat
+      ansible.builtin.group:
+        name: tomcat
+        system: yes
+  
+    - name: Crear usuario para Tomcat
+      ansible.builtin.user:
+        name: tomcat
+        group: tomcat
+        create_home: no
+        system: yes
+
     - name: Crear archivo de unidad SystemD para Tomcat
-      copy:
+      ansible.builtin.copy:
         dest: /etc/systemd/system/tomcat.service
         content: |
           [Unit]
@@ -65,34 +67,35 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: Crear usuario y grupo para Tomcat
-      user:
-        name: tomcat
-        group: tomcat
-        create_home: no
-        system: yes
-
-    - name: Cambiar propietario de Tomcat
-      file:
+    - name: Cambiar propietario del enlace simbólico Tomcat
+      ansible.builtin.file:
         path: /opt/tomcat
         owner: tomcat
         group: tomcat
+        state: link
+
+    - name: Cambiar propietario del directorio de Tomcat
+      ansible.builtin.file:
+        path: /opt/apache-tomcat-{{ tomcat_version }}
+        owner: tomcat
+        group: tomcat
         recurse: yes
+        state: directory
 
     - name: Habilitar e iniciar Tomcat
-      systemd:
+      ansible.builtin.systemd:
         name: tomcat
         state: started
         enabled: yes
 
     - name: Abrir puertos de Tomcat en el firewall
-      firewalld:
+      ansible.posix.firewalld:
         service: http
         permanent: yes
         state: enabled
 
-     - name: Copiar archivo WAR de la aplicación ToDo
-      copy:
+    - name: Copiar archivo WAR de la aplicación ToDo
+      ansible.builtin.copy:
         src: files/todo.war
         dest: "{{ war_file }}"
         owner: tomcat
@@ -100,7 +103,7 @@
         mode: '0644'
 
     - name: Crear archivo de configuración app.properties
-      copy:
+      ansible.builtin.copy:
         content: |
           tipoDB=mysql
           jdbcURL=jdbc:mysql://localhost:3306/todo
