@@ -90,10 +90,14 @@
 
     - name: Abrir puertos de Tomcat en el firewall
       ansible.posix.firewalld:
-        service: http
+        port: 8080/tcp
         permanent: yes
         state: enabled
 
+    - name: Recargar el firewall para aplicar los cambios
+      ansible.builtin.command:
+        cmd: firewall-cmd --reload
+    
     - name: Copiar archivo WAR de la aplicación ToDo
       ansible.builtin.copy:
         src: files/todo.war
