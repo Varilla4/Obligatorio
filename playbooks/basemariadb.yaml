@@ -73,6 +73,7 @@
         priv: 'todo.*: ALL,GRANT'
         state: present
         login_user: root
+        host: '%'
         login_password: prueba2024
 
     - name: Crear tabla 'users'
