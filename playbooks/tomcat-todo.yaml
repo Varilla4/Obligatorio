@@ -106,8 +106,8 @@
       ansible.builtin.copy:
         content: |
           tipoDB=mysql
-          jdbcURL=jdbc:mysql://localhost:3306/todo
-          jdbcUsername=prueba
+          jdbcURL=jdbc:mysql://192.168.56.104:3306/todo
+          jdbcUsername=todo
           jdbcPassword=prueba2024
         dest: "{{ app_properties_file }}"
         owner: tomcat
