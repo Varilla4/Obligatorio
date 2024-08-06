@@ -4,7 +4,6 @@
   user: ansible
   become: yes
   vars:
-    ansible_python_interpreter: auto_silent
     password: 'prueba2024' 
   
   tasks:
@@ -58,7 +57,7 @@
       login_password: '{{password}}'
       state: present
       name: prueba
-      password: prueba2024
+      password: '{{password}}'
       host: '%'
       column_case_sensitive: false
 

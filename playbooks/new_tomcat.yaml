@@ -62,16 +62,7 @@
       dest: /opt/tomcat
       remote_src: yes
       extra_opts: ['--strip-components=1',]
-
-  - name: Cambiar permisos de la carpeta de Tomcat
-    ansible.builtin.file:
-      path: /opt/tomcat
-      state: directory
-      recurse: true
-      owner: tomcat
-      group: tomcat
-      mode: '755'
-     
+  
   - name: Copiar archivo para hacer a Tomcat un servicio
     ansible.builtin.copy:
       src: new_files/tomcat.service
@@ -83,7 +74,7 @@
       dest: /opt/tomcat-users.xml
       owner: tomcat
       group: tomcat
-      mode: '0644'
+      mode: '755'
 
   - name: Crear /opt/config para app.properties
     ansible.builtin.file:
@@ -99,6 +90,15 @@
     ansible.builtin.copy:
       src: new_files/todo.war
       dest: '{{app_dir}}'
+
+  - name: Cambiar permisos de la carpeta de Tomcat
+    ansible.builtin.file:
+      path: /opt/tomcat
+      state: directory
+      recurse: true
+      owner: tomcat
+      group: tomcat
+      mode: '755'
 
   - name: Habilitar e iniciar servicio Tomcat
     ansible.builtin.systemd_service:
