@@ -1,14 +1,15 @@
 
-#Pasos para la ejecución de los playbooks
+#Pasos para la ejecución de los playbooks, válidos para servidores GNU/Linux
 
 #Crear un usuario ansible para instalar la aplicación:
 sudo useradd ansible
 
-#Instalar ansible:
-Sudo dnf install Python-pip 
-Pip install pipx 
-Pipx ensurepath 
-Pipx install ansible-core
+#Instalar ansible y complementos necesarios, en este orden:
+
+sudo dnf install Python-pip (requiere permisos de usuario root)
+pip install pipx 
+pipx ensurepath 
+pipx install ansible-core
 pipx inject ansible-core argcomplete
 pipx inject ansible-core ansible-lint
 activate-global-python-argcomple --user
@@ -23,7 +24,7 @@ ssh-copy-id usuario@servidor_remoto
 https://github.com/Varilla4/Obligatorio
 
 #Editar el archivo host que se encuentra dentro de inventary (inventary/host)
-agregando el grupo o host sobre el que se va a ejecutar el playbook
+Agregando el grupo o host sobre el que se va a ejecutar el playbook
 
 #Colecciones requeridas para playbook tomcat-todo.yaml:
 ansible-galaxy collection install ansible.posix (requerida para firewalld)
