@@ -6,7 +6,7 @@
   tasks:
 
     - name: Instalar dependencias necesarias
-      yum:
+      ansible.builtin.yum:
         name:
           - yum-utils
           - device-mapper-persistent-data
@@ -14,59 +14,59 @@
         state: present
 
     - name: Agregar repositorio oficial de Docker
-      get_url:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/docker-ce.repo
 
     - name: Instalar Docker
-      yum:
+      ansible.builtin.yum:
         name: docker-ce
         state: present
 
     - name: Iniciar y habilitar el servicio Docker
-      systemd:
+      ansible.builtin.systemd:
         name: docker
         state: started
         enabled: yes
 
-    - name: Instalar Docker Compose
+    - name: Descargar docker-compose
       get_url:
-        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)
+        url: https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
         dest: /usr/local/bin/docker-compose
         mode: 'u+x'
 
     - name: Crear directorio /opt/docker
-      file:
+      ansible.builtin.file:
         path: /opt/docker
         state: directory
 
     - name: Copiar docker-compose.yml al servidor
-      copy:
+      ansible.builtin.copy:
         src: files/docker-compose.yml
         dest: /opt/docker/docker-compose.yml
 
     - name: Copiar Dockerfile al servidor
-      copy:
+      ansible.builtin.copy:
         src: files/Dockerfile
         dest: /opt/docker/Dockerfile
 
     - name: Copiar app.properties al servidor
-      copy:
+      ansible.builtin.copy:
         src: files/app.properties
         dest: /opt/docker/app.properties
 
     - name: Copiar todo.war al servidor
-      copy:
+      ansible.builtin.copy:
         src: files/todo.war
         dest: /opt/docker/todo.war
 
-    - name: Copiar tomcat-user.xml al servidor
-      copy:
-        src: files/tomcat-user.xml
-        dest: /opt/docker/tomcat-user.xml
+    - name: Copiar tomcat-users.xml al servidor
+      ansible.builtin.copy:
+        src: files/tomcat-users.xml
+        dest: /opt/docker/tomcat-users.xml
 
     - name: Abrir puerto 8080 en el firewall
-      firewalld:
+      ansible.posix.firewalld:
         port: 8080/tcp
         permanent: yes
         state: enabled
@@ -76,4 +76,4 @@
         cmd: firewall-cmd --reload
 
     - name: Construir y ejecutar contenedor Docker
-      command: docker-compose -f /opt/docker/docker-compose.yml up -d
+      ansible.builtin.command: /usr/local/bin/docker-compose -f /opt/docker/docker-compose.yml up -d
