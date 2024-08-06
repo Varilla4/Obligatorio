@@ -36,34 +36,6 @@
         regexp: '^bind-address'
         line: 'bind-address = 0.0.0.0'
         state: present
-        
-    - name: test mysql_secure_installation
-      mysql_secure_installation:
-        login_password: ''
-        new_password: prueba2024
-        user: root
-        login_host: localhost
-        hosts: ['localhost', '127.0.0.1']
-        change_root_password: true
-        remove_anonymous_user: true
-        disallow_root_login_remotely: true
-        remove_test_db: true
-      register: mysql_secure  
-
-    - name: Asegurar MariaDB con mysql_secure_installation
-      ansible.builtin.command:
-        cmd: mysql_secure_installation
-        stdin: |
-          ''
-          Y
-          prueba2024
-          prueba2024
-          n
-          y
-          y
-          y
-          y
-      when: install_result.changed
 
     - name: Asegurarse de que MariaDB esté en funcionamiento
       ansible.builtin.service:
@@ -139,4 +111,4 @@
         query: |
           GRANT ALL PRIVILEGES ON todo.* TO 'todo'@'%';
           FLUSH PRIVILEGES;
-      login_unix_socket: /run/mysqld/mysqld.sock 
+        login_unix_socket: /run/mysqld/mysqld.sock 
