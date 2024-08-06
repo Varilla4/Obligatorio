@@ -9,7 +9,6 @@
     tomcat_version: 9.0.93
     tomcat_version_splitted: "{{ tomcat_version.split('.') }}"
     tomcat_major_version: "{{ tomcat_version_splitted[0] }}"
-    ansible_python_interpreter: auto_silent
 
   tasks:
 
@@ -44,7 +43,6 @@
     ansible.builtin.get_url:
       url: https://dlcdn.apache.org/tomcat/tomcat-{{tomcat_major_version}}/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz
       dest: /tmp
-    when: file.stat.exists == false
 
   - name: Instalar tar
     ansible.builtin.dnf:
