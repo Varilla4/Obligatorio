@@ -30,6 +30,13 @@
       register: install_result
       changed_when: install_result.changed
 
+    - name: Configurar MariaDB para escuchar en todas las interfaces
+      ansible.builtin.lineinfile:
+        path: /etc/mysql/mariadb.conf.d/50-server.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
+        
     - name: test mysql_secure_installation
       mysql_secure_installation:
         login_password: ''
@@ -70,6 +77,11 @@
         port: '3306'
         proto: tcp
         state: enabled
+
+    - name: Reiniciar ufw para aplicar cambios
+      ansible.builtin.systemd:
+        name: ufw
+        state: restarted  
 
     - name: Crear base de datos "todo"
       community.mysql.mysql_db:
@@ -119,3 +131,12 @@
             `title` varchar(255) DEFAULT NULL,
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    - name: Otorgar permisos al usuario 'todo' en todas las tablas de la base de datos 'todo'
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: prueba2024
+        query: |
+          GRANT ALL PRIVILEGES ON todo.* TO 'todo'@'%';
+          FLUSH PRIVILEGES;
+      login_unix_socket: /run/mysqld/mysqld.sock 

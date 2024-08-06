@@ -32,6 +32,7 @@
         src: "/opt/apache-tomcat-{{ tomcat_version }}"
         dest: /opt/tomcat
         state: link
+        
 
     - name: Crear grupo para Tomcat
       ansible.builtin.group:
@@ -73,6 +74,14 @@
         owner: tomcat
         group: tomcat
         state: link
+
+    - name: Copiar el archivo JAR del conector JDBC a Tomcat
+      copy:
+        src: /path/to/your/driver/mariadb-java-client-3.1.0.jar
+        dest: /opt/tomcat/lib/
+        owner: tomcat
+        group: tomcat
+        mode: '0644'
 
     - name: Cambiar propietario del directorio de Tomcat
       ansible.builtin.file:
