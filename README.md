@@ -26,18 +26,18 @@ https://github.com/Varilla4/Obligatorio
 #Editar el archivo host que se encuentra dentro de inventary (inventary/host)
 Agregando el grupo o host sobre el que se va a ejecutar el playbook
 
-#Colecciones requeridas para playbook tomcat-todo.yaml:
+#Colecciones requeridas para playbook new_tomcat.yaml:
 ansible-galaxy collection install ansible.posix (requerida para firewalld)
 
-#Colecciones requeridas para playbook basemariadb.yaml:
+#Colecciones requeridas para playbook new_mariadb.yaml:
 ansible-galaxy collection install community.mysql (requerida para trabajar con la base de datos) 
 ansible-galaxy collection install community.general (requerida para firewall ufw)
 
-#Ejecutar playbook tomcat-todo.yaml:
-ansible-playbook -i inventary/host playbooks/tomcat-todo.yaml --ask-become-pass
+#Ejecutar playbook new_tomcat.yaml:
+ansible-playbook -i inventary/host playbooks/new_tomcat.yaml --ask-become-pass
 
-#Ejecutar playbook basemariadb.yaml:
-ansible-playbook -i inventary/host playbooks/basemariadb.yaml --ask-become-pass
+#Ejecutar playbook new_mariadb.yaml:
+ansible-playbook -i inventary/host playbooks/new_mariadb.yaml --ask-become-pass
 
 
 
