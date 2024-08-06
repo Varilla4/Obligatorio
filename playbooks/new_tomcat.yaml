@@ -100,6 +100,15 @@
       group: tomcat
       mode: '755'
 
+  - name: Cambiar permisos de la carpeta de app.properties
+    ansible.builtin.file:
+      path: /opt/config
+      state: directory
+      recurse: true
+      owner: tomcat
+      group: tomcat
+      mode: '755'  
+
   - name: Habilitar e iniciar servicio Tomcat
     ansible.builtin.systemd_service:
       name: tomcat
