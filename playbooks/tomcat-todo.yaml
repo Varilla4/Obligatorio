@@ -33,7 +33,6 @@
         dest: /opt/tomcat
         state: link
         
-
     - name: Crear grupo para Tomcat
       ansible.builtin.group:
         name: tomcat
@@ -77,8 +76,16 @@
 
     - name: Copiar el archivo JAR del conector JDBC a Tomcat
       copy:
-        src: /path/to/your/driver/mariadb-java-client-3.1.0.jar
+        src: files/mariadb-java-client-3.1.0.jar
         dest: /opt/tomcat/lib/
+        owner: tomcat
+        group: tomcat
+        mode: '0644'
+    
+    - name: Copiar el archivo context.xml a Tomcat
+      ansible.builtin.copy:
+        src: files/context.xml
+        dest: /opt/tomcat/conf/context.xml
         owner: tomcat
         group: tomcat
         mode: '0644'
