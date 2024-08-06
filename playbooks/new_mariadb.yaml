@@ -59,6 +59,7 @@
       state: present
       name: prueba
       password: prueba2024
+      host: '%'
       column_case_sensitive: false
 
   - name: Crear tablas en la base
