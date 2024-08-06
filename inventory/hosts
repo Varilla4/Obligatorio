@@ -1,8 +1,8 @@
 [ubuntu]
-ubuntu-ob ansible_host=192.168.56.104
+ubuntu-ob ansible_host=192.168.0.2
 
 [centos]
-centos-ob ansible_host=192.168.56.101
+centos-ob ansible_host=192.168.0.3
 
 [linux:children]
 ubuntu

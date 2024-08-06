@@ -1,0 +1,119 @@
+---
+- name: Instalar Tomcat con deploy
+  hosts: centos
+  user: ansible
+  become: yes
+  vars:
+    app_dir: /opt/tomcat/webapps
+    config_dir: /opt/config
+    tomcat_version: 9.0.93
+    tomcat_version_splitted: "{{ tomcat_version.split('.') }}"
+    tomcat_major_version: "{{ tomcat_version_splitted[0] }}"
+    ansible_python_interpreter: auto_silent
+
+  tasks:
+
+  - name: Actualizar sistema
+    ansible.builtin.dnf:
+      name: '*'
+      state: latest
+
+  - name: Instalar Java
+    ansible.builtin.dnf:
+      name: java
+      state: latest
+  
+  - name: Copiar conector SQL
+    ansible.builtin.copy:
+      src: new_files/mysql-connector-j-9.0.0-1.el9.noarch.rpm
+      dest: /tmp
+
+  - name: Instalar conector SQL
+    ansible.builtin.dnf:
+      name: /tmp/mysql-connector-j-9.0.0-1.el9.noarch.rpm
+      state: present
+      disable_gpg_check: true
+    
+  - name: Crear usuario para Tomcat
+    ansible.builtin.user:
+      name: tomcat
+      shell: /sbin/nologin
+      create_home: false
+
+  - name: Descargar Tomcat
+    ansible.builtin.get_url:
+      url: https://dlcdn.apache.org/tomcat/tomcat-{{tomcat_major_version}}/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz
+      dest: /tmp
+    when: file.stat.exists == false
+
+  - name: Instalar tar
+    ansible.builtin.dnf:
+      name: tar
+      state: latest
+
+  - name: Crea la carpeta para tomcat
+    ansible.builtin.file:
+      path: /opt/tomcat
+      state: directory
+  
+  - name: Descomprimir el paquete descargado
+    ansible.builtin.unarchive:
+      src: /tmp/apache-tomcat-{{tomcat_version}}.tar.gz
+      dest: /opt/tomcat
+      remote_src: yes
+      extra_opts: ['--strip-components=1',]
+
+  - name: Cambiar permisos de la carpeta de Tomcat
+    ansible.builtin.file:
+      path: /opt/tomcat
+      state: directory
+      recurse: true
+      owner: tomcat
+      group: tomcat
+      mode: '755'
+     
+  - name: Copiar archivo para hacer a Tomcat un servicio
+    ansible.builtin.copy:
+      src: new_files/tomcat.service
+      dest: /etc/systemd/system/
+
+  - name: Copiar archivo para usuarios de Tomcat
+    ansible.builtin.copy:
+      src: new_files/tomcat-users.xml
+      dest: /opt/tomcat-users.xml
+      owner: tomcat
+      group: tomcat
+      mode: '0644'
+
+  - name: Crear /opt/config para app.properties
+    ansible.builtin.file:
+      path: '{{config_dir}}'
+      state: directory
+
+  - name: Copiar app.properties
+    ansible.builtin.copy:
+      src: new_files/app.properties
+      dest: '{{config_dir}}'
+
+  - name: Copiar todo.war
+    ansible.builtin.copy:
+      src: new_files/todo.war
+      dest: '{{app_dir}}'
+
+  - name: Habilitar e iniciar servicio Tomcat
+    ansible.builtin.systemd_service:
+      name: tomcat
+      state: restarted
+      daemon_reload: true
+      enabled: true
+
+  - name: Habilitar puerto 8080
+    ansible.posix.firewalld:
+      port: 8080/tcp
+      permanent: true
+      state: enabled
+
+  - name: Recargar el firewall
+    ansible.builtin.systemd_service:
+      name: firewalld
+      state: reloaded
