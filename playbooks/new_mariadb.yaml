@@ -80,4 +80,9 @@
   - name: Reiniciar ufw para aplicar cambios
     ansible.builtin.systemd:
       name: ufw
+      state: restarted
+
+  - name: Reiniciar el servicio MariaDB
+    ansible.builtin.systemd:
+      name: mariadb
       state: restarted  
